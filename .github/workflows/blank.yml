@@ -1,128 +1,58 @@
-name: RaceDay CI
+# This is a basic workflow to help you get started with Actions
 
-# Runs on every push and pull request targeting main/develop.
-# Adjust branch names to match your repo's convention.
+name: CI
+
+# Controls when the workflow will run
+
 on:
+
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+
   push:
-    branches: [ main, develop ]
+
+    branches: [ "main" ]
+
   pull_request:
-    branches: [ main, develop ]
+
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 
 jobs:
 
-  # ---------------------------------------------------------------
-  # 1. .NET BACKEND - restore, build, lint (format check), test
-  # ---------------------------------------------------------------
-  backend:
-    name: Backend (.NET) - Build & Test
+  # This workflow contains a single job called "build"
+
+  build:
+
+    # The type of runner that the job will run on
+
     runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'   # match the SDK version in your .csproj / global.json
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 
-      # CHANGE THIS PATH: point at your solution (.sln) file
-      - name: Restore dependencies
-        run: dotnet restore ./RaceDay.sln
+      - uses: actions/checkout@v4
 
-      - name: Check formatting (lint)
-        run: dotnet format ./RaceDay.sln --verify-no-changes --severity warn
+      # Runs a single command using the runners shell
 
-      - name: Build
-        run: dotnet build ./RaceDay.sln --no-restore --configuration Release
+      - name: Run a one-line script
 
-      # CHANGE THIS PATH: point at your test project (e.g. RaceDay.Tests.csproj)
-      - name: Run tests
-        run: dotnet test ./RaceDay.sln --no-build --configuration Release --logger "trx;LogFileName=test-results.trx"
+        run: echo Hello, world!
 
-      - name: Publish test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-test-results
-          path: '**/test-results.trx'
+      # Runs a set of commands using the runners shell
 
-  # ---------------------------------------------------------------
-  # 2. FRONTEND (React) - install, lint, build, test
-  #    Delete this job (or swap it for a Blazor build step in the
-  #    backend job above) if you go with Blazor instead of React.
-  # ---------------------------------------------------------------
-  frontend:
-    name: Frontend (React) - Build & Test
-    runs-on: ubuntu-latest
-    # CHANGE THIS PATH: folder containing your React app's package.json
-    defaults:
-      run:
-        working-directory: ./client
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Run a multi-line script
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: client/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Run tests
-        run: npm test -- --watchAll=false
-
-      - name: Build
-        run: npm run build
-
-  # ---------------------------------------------------------------
-  # 3. SQL SCHEMA VALIDATION
-  #    Spins up a real SQL Server instance and runs your schema
-  #    script against it, so a broken script fails CI instead of
-  #    being caught at submission time.
-  # ---------------------------------------------------------------
-  database:
-    name: Validate SQL Schema Script
-    runs-on: ubuntu-latest
-    services:
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2022-latest
-        env:
-          ACCEPT_EULA: "Y"
-          MSSQL_SA_PASSWORD: "CI_Passw0rd!"
-        ports:
-          - 1433:1433
-        options: >-
-          --health-cmd="/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'CI_Passw0rd!' -C -Q 'SELECT 1' || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install sqlcmd
         run: |
-          curl -sSL -O https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
-          sudo dpkg -i packages-microsoft-prod.deb
-          sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-          echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
 
-      - name: Wait for SQL Server to be ready
-        run: |
-          for i in {1..10}; do
-            sqlcmd -S localhost -U sa -P 'CI_Passw0rd!' -C -Q "SELECT 1" && break
-            echo "Waiting for SQL Server... ($i)"
-            sleep 5
-          done
+          echo Add other actions to build,
 
-      # CHANGE THIS PATH if your schema script lives elsewhere
-      - name: Run schema + seed script
-        run: sqlcmd -S localhost -U sa -P 'CI_Passw0rd!' -C -i docs/RaceDay_Schema.sql
+          echo test, and deploy your project.
+

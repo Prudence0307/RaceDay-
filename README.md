@@ -40,3 +40,10 @@ with the same entities, primary keys, foreign keys, and cardinality shown in
 **Seed data:** 2 Organisers, 2 Participants, 3 Events, 5 Categories (across
 the 3 events), 5 Routes, 4 Enrolments, and 2 Results — meeting the minimum
 data requirements in Section C.
+
+## Screenshort of a working CI
+<img width="1346" height="641" alt="Screenshot 2026-09-04 203404" src="https://github.com/user-attachments/assets/13b982b7-158d-43f6-be29-4a23cdb6612e" />
+
+## YouTube Link
+
+https://youtu.be/0cAZ3wn4PnI
